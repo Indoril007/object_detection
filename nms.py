@@ -56,11 +56,11 @@ def non_max_supression_slow(boxes, overlapThresh):
             # if there is sufficient overlap,suppress the
             # current bounding box
             if overlap > overlapThresh:
-                supress.append(pos)
+                suppress.append(pos)
         
         # delete all indexes from the index list that are in the
         # suppression list
-        idxs = np.delete(idxs, supress)
+        idxs = np.delete(idxs, suppress)
 
     # return only the bounding boxes that were picked
     return boxes[pick]
