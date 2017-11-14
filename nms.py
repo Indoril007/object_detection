@@ -1,5 +1,60 @@
 import numpy as np
 
+def get_overlap(box_A, box_B):
+    xA1 = box_A[0]
+    xA2 = box_A[1]
+    yA1 = box_A[2]
+    yA2 = box_A[3]
+    
+    xB1 = box_B[0]
+    xB2 = box_B[1]
+    yB1 = box_B[2]
+    yB2 = box_B[3]
+
+    area = max( (xA2-xA1)*(yA2-yA1), (xB2-xB1)*(yB2-yB1)  )
+
+    # overlap box
+    xx1 = max(xA1, xB1)
+    yy1 = max(yA1, yB1)
+    xx2 = min(xA2, xB2)
+    yy2 = min(yA2, yB2)
+    
+    # compute the width and height of the boudnig box
+    w = max(0, xx2 - xx1 + 1)
+    h = max(0, yy2 - yy1 + 1)
+
+    overlap = float(w * h)/area
+    return overlap
+
+def non_max_supression_with_scores(boxes, scores, overlapThresh):
+    # if there are no boxes, return an empty list
+    if len(boxes) == 0:
+        return []
+    
+    pick = list()
+
+    # initialize the list of picked indexes
+    idxs = set(range(len(boxes)))
+
+    while(len(idxs) > 0):
+        i = idxs.pop()
+        suppress = set()
+        for j in idxs:
+            overlap = get_overlap(boxes[i], boxes[j]) 
+            if (overlap > overlapThresh):
+                if (scores[i] > scores[j]):
+                    suppress.add(j)
+                else:
+                    break
+        else: # This is a FOR-ELSE. IE this will run when the loop exits normally without encountering the break
+            pick.append(i)
+        idxs -= suppress 
+
+    return pick 
+
+def non_max_supression_weighted_average():
+    pass
+
 # Felzenszwalb et al.
 def non_max_supression_slow(boxes, overlapThresh):
     # if there are no boxes, return an empty list
@@ -64,3 +119,6 @@ def non_max_supression_slow(boxes, overlapThresh):
 
     # return only the bounding boxes that were picked
     return boxes[pick]
+
+def non_max_supression_fast():
+    pass
