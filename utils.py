@@ -87,9 +87,10 @@ def display_detections(imgs, conf_threshold):
                continue
             x1, x2, y1, y2 = img["bboxes"][sr]
             cls = img["classes"][sr]
-            rand_color = (random.randint(0,200), random.randint(0,200), random.randint(0,200))
+            rand_color = (random.randint(0,160), random.randint(0,160), random.randint(0,160))
             cv2.rectangle(img_copy, (x1, y1), (x2, y2), rand_color, thickness=2)
             cv2.putText(img_copy, classes[cls], (x1,y1), cv2.FONT_HERSHEY_TRIPLEX, 0.6, rand_color)
+            cv2.putText(img_copy, "conf: %.2f" % (img["confidences"][sr]), (x1,y1+12), cv2.FONT_HERSHEY_TRIPLEX, 0.3, rand_color)
         plt.figure(figsize=(10,10))
         plt.imshow(img_copy)
 
