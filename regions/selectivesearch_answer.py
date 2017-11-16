@@ -317,4 +317,4 @@ def selective_search(
             'labels': r['labels']
         })
 
-        return img, regions
+    return img, regions
