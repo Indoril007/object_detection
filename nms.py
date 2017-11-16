@@ -1,6 +1,6 @@
 import numpy as np
 
-def get_overlap(box_A, box_B):
+def get_iou(box_A, box_B):
     xA1 = box_A[0]
     xA2 = box_A[1]
     yA1 = box_A[2]
@@ -11,7 +11,8 @@ def get_overlap(box_A, box_B):
     yB1 = box_B[2]
     yB2 = box_B[3]
 
-    area = max( (xA2-xA1)*(yA2-yA1), (xB2-xB1)*(yB2-yB1)  )
+    box_A_area = ( xA2 - xA1 ) * ( yA2 - yA1 )
+    box_B_area = ( xB2 - xB1 ) * ( yB2 - yB1 )
 
     # overlap box
     xx1 = max(xA1, xB1)
@@ -19,41 +20,38 @@ def get_overlap(box_A, box_B):
     xx2 = min(xA2, xB2)
     yy2 = min(yA2, yB2)
     
-    # compute the width and height of the boudnig box
+    # compute the width and height of the bouding box
     w = max(0, xx2 - xx1 + 1)
     h = max(0, yy2 - yy1 + 1)
 
-    overlap = float(w * h)/area
-    return overlap
+    overlap_area = w * h
+    union_area = box_A_area + box_B_area - overlap_area
+    iou = overlap_area / union_area
 
-def non_max_supression_with_scores(boxes, scores, overlapThresh):
+    return iou
+
+def non_max_supression_with_scores(boxes, scores, threshold):
     # if there are no boxes, return an empty list
     if len(boxes) == 0:
         return []
-    
-    pick = list()
 
-    # initialize the list of picked indexes
-    idxs = set(range(len(boxes)))
+    idxs = np.argsort(scores)
+    suppress = set()
 
-    while(len(idxs) > 0):
-        i = idxs.pop()
-        suppress = set()
-        for j in idxs:
-            overlap = get_overlap(boxes[i], boxes[j]) 
-            if (overlap > overlapThresh):
-                if (scores[i] > scores[j]):
-                    suppress.add(j)
-                else:
-                    break
-        else: # This is a FOR-ELSE. IE this will run when the loop exits normally without encountering the break
-            pick.append(i)
-        idxs -= suppress 
-
-    return pick 
-
-def non_max_supression_weighted_average():
-    pass
+    for i, idx_high_score in enumerate(idxs[::-1]):
+        i = len(idxs) - i - 1
+        if idx_high_score in suppress:
+            continue
+        for idx_low_score in idxs[:i]:
+            if idx_low_score in suppress:
+                continue
+            
+            iou = get_iou(boxes[idx_high_score], boxes[idx_low_score])
+            if (iou > threshold):
+                suppress.add(idx_low_score)
+                
+    pick = set(range(len(boxes))) - suppress 
+    return list(pick)        
 
 # Felzenszwalb et al.
 def non_max_supression_slow(boxes, overlapThresh):

@@ -57,8 +57,11 @@ def perform_selectivesearch(ss_func, imgs, params, display=True):
             x, y, w, h = region['rect']
             if (region['size'] < MIN_REGION) or (w / h > MAX_RATIO) or (h / w > MAX_RATIO) or (((w*h)/img["area"]) > 0.75):
                 continue
-    
-            img["bboxes"].append(np.array([x,x+w,y,y+h]))
+            
+            bbox = np.array([x, x+w, y, y+h])
+            if (any(np.array_equal(bbox, b) for b in img["bboxes"])):
+                continue
+            img["bboxes"].append(bbox)
             
             # axis order and data type changed in preparation for input into CNN model
             img["cropped_regions"].append(np.moveaxis(img["original"][y:y+h,x:x+w,:],2,0).astype(np.float32))
