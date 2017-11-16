@@ -35,14 +35,15 @@ def non_max_supression_with_scores(boxes, scores, threshold):
     if len(boxes) == 0:
         return []
 
+    # get idxs of sorted scores from greatest to smallest
     idxs = np.argsort(scores)
+    idxs = idxs[::-1]
     suppress = set()
-
-    for i, idx_high_score in enumerate(idxs[::-1]):
-        i = len(idxs) - i - 1
+    
+    for i, idx_high_score in enumerate(idxs):
         if idx_high_score in suppress:
             continue
-        for idx_low_score in idxs[:i]:
+        for idx_low_score in idxs[i+1:]:
             if idx_low_score in suppress:
                 continue
             
